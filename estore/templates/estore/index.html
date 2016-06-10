@@ -1,0 +1,44 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+    <script>
+        $(document).ready(function(){
+            $( "button.add" ).click(function(){
+                var current_button = $(this);
+                console.log($(this).text());
+                if ($(this).text() == "Add")
+                    $.ajax({
+                        url: "/add-to-cart/",
+                        type: "GET",
+                        data: {"item": $(this).attr("id")},
+                        success: function(data){
+                            current_button.html(data);
+                        }
+                    });
+                if ($(this).text() == "Remove")
+                    $.ajax({
+                        url: "/remove-from-cart/",
+                        type: "GET",
+                        data: {"item": $(this).attr("id")},
+                        success: function(data){
+                            current_button.html(data);
+                        }
+                    });            
+            });
+        });
+    </script>
+
+    <a href='/accounts/logout'>exit</a>
+    <a href='/login/vk-oauth2/'>login with VK</a>
+    <a href='/payment/cart/'>My cart</a>
+    <ul>
+    {% for item in items %}
+        {% if item in cart %}
+            <li>{{item.name}} <button id="item{{ item.id }}" class="add">Remove</button></li>
+        {% else %}
+            <li>{{item.name}} <button id="item{{ item.id }}" class="add">Add</button></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+</body>

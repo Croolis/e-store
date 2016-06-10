@@ -1,0 +1,19 @@
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+
+
+    <a href='/accounts/logout'>exit</a>
+    <a href='/login/vk-oauth2/'>login with VK</a>
+    <ul>
+    {% for item in cart %}
+        <li>{{item.name}} ● {{item.description}} ● Цена: {{item.price}} рублей</li>
+    {%endfor %}
+    </ul>
+    Сумма заказа {{price}} рублей
+    <p>Invoice: {{ paypal_dict.invoice }}</p>
+    <br />
+    <p>Pay with PayPal:</p>
+    {{ form.render }}
+</body>
