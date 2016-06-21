@@ -1,0 +1,68 @@
+{% load staticfiles %}
+
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script>
+            function onClickAdd(item_id) {
+                var current_button = $('#item'+item_id);
+                if (current_button.html() == "Add")
+                    $.ajax({
+                        url: "/add-to-cart/",
+                        type: "GET",
+                        data: {"item": current_button.attr("id")},
+                        success: function(data){
+                            data = JSON.parse(data);
+                            current_button.html(data.text);
+                        }
+                    });
+                if (current_button.html() == "Remove")
+                    $.ajax({
+                        url: "/remove-from-cart/",
+                        type: "GET",
+                        data: {"item": current_button.attr("id")},
+                        success: function(data){
+                            data = JSON.parse(data);
+                            current_button.html(data.text);
+                        }
+                    });
+            }
+        </script>
+        <style>body{padding-top:60px;}</style>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
+    </head>
+    <body>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">E-commerce</a>
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="/cart">Cart</a></li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if user.is_authenticated %}
+                            <li><a = href="accounts/profile">{{user.username}}</a></li>
+                            <li><a = href="accounts/logout">Выйти</a></li>
+                        {% else %}
+                            <li><a = href="/login/vk-oauth2/">Войти через VK</a></li>
+                            <li><a = href="/login/google-oauth2/">Войти через gmail</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>

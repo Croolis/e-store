@@ -9,6 +9,14 @@ def get_code(request):
         cart.save()
     return c
 
+def get_cost(code):
+    items = Cart.objects.filter(code=code)[0].items.all()
+    cost = 0
+    for item in items:
+        cost += item.price
+    return cost
+
+
 def add_item(code, item_id):
     cart = Cart.objects.filter(code=code)[0]
 
@@ -23,7 +31,6 @@ def add_item(code, item_id):
 
 def remove_item(code, item_id):
     cart = Cart.objects.filter(code=code)[0]
-
     items = Item.objects.filter(id=item_id)
     if (len(items) == 0):
         return False

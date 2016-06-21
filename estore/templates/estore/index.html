@@ -1,44 +1,27 @@
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-</head>
-<body>
-    <script>
-        $(document).ready(function(){
-            $( "button.add" ).click(function(){
-                var current_button = $(this);
-                console.log($(this).text());
-                if ($(this).text() == "Add")
-                    $.ajax({
-                        url: "/add-to-cart/",
-                        type: "GET",
-                        data: {"item": $(this).attr("id")},
-                        success: function(data){
-                            current_button.html(data);
-                        }
-                    });
-                if ($(this).text() == "Remove")
-                    $.ajax({
-                        url: "/remove-from-cart/",
-                        type: "GET",
-                        data: {"item": $(this).attr("id")},
-                        success: function(data){
-                            current_button.html(data);
-                        }
-                    });            
-            });
-        });
-    </script>
+{% extends 'estore/layout.html' %}
 
-    <a href='/accounts/logout'>exit</a>
-    <a href='/login/vk-oauth2/'>login with VK</a>
-    <a href='/payment/cart/'>My cart</a>
-    <ul>
-    {% for item in items %}
-        {% if item in cart %}
-            <li>{{item.name}} <button id="item{{ item.id }}" class="add">Remove</button></li>
-        {% else %}
-            <li>{{item.name}} <button id="item{{ item.id }}" class="add">Add</button></li>
-        {% endif %}
-    {% endfor %}
-    </ul>
-</body>
+{% block body %}
+    <div class="container">
+        <div class="row">
+        {%for item in items%}
+            <div>
+                <div class="col-sm-6 col-md-4">
+                    <div class="thumbnail" id="item_cont">
+                        
+                        <div class="caption">
+                            <h3>{{item.name}}</h3>
+                            <p>price: {{item.price}}</p>
+                            <p><a href="item{{item.id}}" class="btn btn-primary" role="button">Show</a>
+                            {% if item in cart %}
+                            <a class="btn btn-default" id="item{{item.id}}" onclick="onClickAdd({{item.id}})" role="button">Remove</a></p>
+                            {% else %}
+                            <a class="btn btn-default" id="item{{item.id}}" onclick="onClickAdd({{item.id}})" role="button">Add</a></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {%endfor%}
+        </div>
+    </div>
+{% endblock %}

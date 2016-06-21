@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, User
 from paypal.standard.forms import PayPalPaymentsForm
-from estore.utils import get_code, add_item, remove_item
+from estore.utils import get_code, get_cost, add_item, remove_item
 from estore.models import Cart, Item
 
 def index(request):
@@ -21,14 +21,23 @@ def index(request):
     response.set_cookie('cart', code)
     return response
 
+def item(request, item_id = 1):
+    template = loader.get_template('estore/item.html')
+    item = Item.objects.filter(id=item_id)[0]
+    context = {'item' : item}
+
+    response = HttpResponse(template.render(context, request))
+    return response
+
 def add(request):
     item_id = request.GET.get('item', '')[4:]
     code = get_code(request)
     success = add_item(code, item_id)
     if (not success):
-        return HttpResponse("Add")
+        return HttpResponse('{"text":"Add", "cost":-1}')
 
-    response = HttpResponse("Remove")
+    cost = get_cost(get_code(request))
+    response = HttpResponse('{"text":"Remove", "cost":'+str(cost)+'}')
     response.set_cookie('cart', code)
     return response
 
@@ -36,12 +45,28 @@ def remove(request):
     item_id = request.GET.get('item', '')[4:]
     code = get_code(request)
     success = remove_item(code, item_id)
+    response = HttpResponse()
     if (not success):
-        return HttpResponse("Remove")
+        return HttpResponse('{"text":"Remove", "cost":-1}')
 
-    response = HttpResponse("Add")
-    response.set_cookie('cart', code)    
+    cost = get_cost(get_code(request))
+    response = HttpResponse('{"text":"Add", "cost":'+str(cost)+'}')
+    response.set_cookie('cart', code)
     return response
+
+def cart(request):
+    template = loader.get_template('estore/cart.html')
+    code = get_code(request)
+    cart_items = Cart.objects.filter(code=code)[0].items.all()
+    price = 0
+    for item in cart_items:
+        price += item.price
+
+    context = {"cart": cart_items, "price": price}
+
+    response = HttpResponse(template.render(context, request))
+    response.set_cookie('cart', code)
+    return response    
 
 @login_required
 def account_profile(request):
@@ -57,40 +82,35 @@ def account_logout(request):
 
 @csrf_exempt
 def paypal_success(request):
-    """
-    Tell user we got the payment.
-    """
-    return HttpResponse("Money is mine. Thanks.")
+    template = loader.get_template('estore/success.html')
+    context = {}
+    response = HttpResponse(template.render(context, request))
+    response.delete_cookie('cart')
+    return response
 
 
 @login_required
 def paypal_pay(request):
-    template = loader.get_template('estore/cart.html')
+    template = loader.get_template('estore/payment.html')
     code = get_code(request)
     cart_items = Cart.objects.filter(code=code)[0].items.all()
     price = 0
     for item in cart_items:
         price += item.price
-
-
-    template = loader.get_template('estore/cart.html')
     paypal_dict = {
-        "business": "mnovikova@gmail.com",
+        "business": "aesamburov-facilitator@gmail.com",
         "amount": str(price) + ".00",
         "currency_code": "RUB",
         "item_name": "some products",
         "invoice": code,
         "notify_url": reverse('paypal-ipn'),
-        "return_url": "http://localhost:8000/payment/success/",
-        "cancel_return": "http://localhost:8000/payment/cart/",
+        "return_url": "http://127.0.0.1:8000/payment/success/",
+        "cancel_return": "http://127.0.0.1:8000/payment/cart/",
         "custom": str(request.user.id)
     }
 
     form = PayPalPaymentsForm(initial=paypal_dict)
-    context = {"form": form, "paypal_dict": paypal_dict, "cart": cart_items, "price": price}
-
+    context = {"form": form, "paypal_dict": paypal_dict}
     response = HttpResponse(template.render(context, request))
-    response.set_cookie('cart', code)
-    return response
-    
-
+    response.delete_cookie('cart')
+    return HttpResponse(template.render(context, request))

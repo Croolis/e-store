@@ -1,19 +1,41 @@
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-</head>
-<body>
+{% extends 'estore/layout.html' %}
 
+{% block body %}
+    <script type="text/javascript">
+        function Remove(id) {
+            var elem = document.getElementById("block" + id);
+            elem.parentNode.removeChild(elem);
+            $.ajax({
+                url: "/remove-from-cart/",
+                type: "GET",
+                data: {"item": "item"+id},
+                success: function(data){
+                }
+            });
+        }
+    </script>
 
-    <a href='/accounts/logout'>exit</a>
-    <a href='/login/vk-oauth2/'>login with VK</a>
-    <ul>
-    {% for item in cart %}
-        <li>{{item.name}} ● {{item.description}} ● Цена: {{item.price}} рублей</li>
-    {%endfor %}
-    </ul>
-    Сумма заказа {{price}} рублей
-    <p>Invoice: {{ paypal_dict.invoice }}</p>
-    <br />
-    <p>Pay with PayPal:</p>
-    {{ form.render }}
-</body>
+    <div class="container">
+        <div class="row">
+        {%for item in cart%}
+            <div id="block{{item.id}}">
+                <div class="col-sm-6 col-md-4">
+                    <div class="thumbnail" id="item_cont">
+                        <div class="caption">
+                            <h3>{{item.name}}</h3>
+                            <p>price: {{item.price}}</p>
+                            <button type="button" class="btn btn-default btn-sm" onclick="Remove({{item.id}})"">
+                                <span class="glyphicon glyphicon-remove"></span> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {%endfor%}
+        </div>
+    </div>
+
+    <div class="col-md-12 text-center"> 
+        <a href="/payment/cart/" class="btn btn-default active">Оплатить заказ</a>
+    </div>
+{% endblock %}
