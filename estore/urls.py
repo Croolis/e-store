@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^remove-from-cart/$', views.remove, name='remove'),
     url(r'^cart/$', views.cart, name='cart'),
     url(r'^item(?P<item_id>\d+)$', views.item, name='item'),
+    url(r'^category(?P<category_id>\d+)$', views.index, name='category'),
 
     url(r'^accounts/logout/$', views.account_logout, name='logout'),
 	url(r'^accounts/login/$', views.index, name='login'),

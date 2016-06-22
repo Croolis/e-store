@@ -16,6 +16,13 @@ def get_cost(code):
         cost += item.price
     return cost
 
+def paid_cart(code):
+    try:
+        items = Cart.objects.filter(code=code)[0].items.all()
+        for item in items:
+            item.amount = max(0, item.amount - 1)
+    except:
+        pass
 
 def add_item(code, item_id):
     cart = Cart.objects.filter(code=code)[0]

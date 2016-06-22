@@ -3,6 +3,25 @@
 {% block body %}
     <div class="container">
         <div class="row">
+            <div class="col-md-6">
+                {% if selected == 0 %}
+                    <a href="/" class="btn btn-primary custom-button-width" role="button">All</a>
+                {% else %}
+                    <a href="/" class="btn btn-default custom-button-width" role="button">All</a>
+                {% endif %}
+                {% for category in categories %}
+                    {% if category.id == selected %}
+                        <a href="/category{{category.id}}" class="btn btn-primary custom-button-width">{{category.name}}</a>
+                    {% else %}
+                        <a href="/category{{category.id}}" class="btn btn-default custom-button-width">{{category.name}}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
         {%for item in items%}
             <div>
                 <div class="col-sm-6 col-md-4">
@@ -11,6 +30,7 @@
                         <div class="caption">
                             <h3>{{item.name}}</h3>
                             <p>price: {{item.price}}</p>
+                            <p>amount: {{item.amount}}</p>
                             <p><a href="item{{item.id}}" class="btn btn-primary" role="button">Show</a>
                             {% if item in cart %}
                             <a class="btn btn-default" id="item{{item.id}}" onclick="onClickAdd({{item.id}})" role="button">Remove</a></p>

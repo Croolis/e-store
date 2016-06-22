@@ -8,14 +8,25 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, User
 from paypal.standard.forms import PayPalPaymentsForm
 from estore.utils import get_code, get_cost, add_item, remove_item
-from estore.models import Cart, Item
+from estore.models import Cart, Item, Category
 
-def index(request):
+def index(request, category_id = -1):
+    import estore.signals
     template = loader.get_template('estore/index.html')
     code = get_code(request)
     cart_items = Cart.objects.filter(code=code)[0].items.all()
-    items = Item.objects.all()
-    context = {'items' : items, 'cart' : cart_items}
+    selected = 0
+    if category_id == -1:
+        items = Item.objects.all()
+    else:
+        category = Category.objects.filter(id=category_id)  
+        try:
+            items = Item.objects.filter(category=category[0])
+            selected = category[0].id
+        except:
+            items = Item.objects.all()
+    context = {'items' : items, 'cart' : cart_items, 
+    'categories' : Category.objects.all(), 'selected' : selected}
 
     response = HttpResponse(template.render(context, request))
     response.set_cookie('cart', code)
@@ -69,14 +80,14 @@ def cart(request):
     return response    
 
 @login_required
-def account_profile(request):
-    return HttpResponse("Hi, {0}! Nice to meet you.".format(request.user))
+def account_profile(request):    
+    template = loader.get_template('estore/profile.html')
+    context = {}
+    response = HttpResponse(template.render(context, request))
+    return response
 
 
 def account_logout(request):
-    """
-    Logout and redirect to the main page.
-    """
     logout(request)
     return redirect('/')
 
@@ -103,7 +114,7 @@ def paypal_pay(request):
         "currency_code": "RUB",
         "item_name": "some products",
         "invoice": code,
-        "notify_url": reverse('paypal-ipn'),
+        "notify_url": "http://127.0.0.1:8000" + reverse('paypal-ipn'),
         "return_url": "http://127.0.0.1:8000/payment/success/",
         "cancel_return": "http://127.0.0.1:8000/payment/cart/",
         "custom": str(request.user.id)
