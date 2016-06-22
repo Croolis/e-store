@@ -4,10 +4,9 @@ from django.apps import AppConfig
 
 
 class StoreConfig(AppConfig):
-    name = 'store'
-    verbose_name = 'Store'
-    app_label='store'
+    name = 'estore'
+    verbose_name = 'eStore'
+    app_label='estore'
 
-    #def ready(self):
-    #	print('&&&&&&&&&&&&&&&&')
-    #	import estore.signals
+    def ready(self):
+    	import estore.signals

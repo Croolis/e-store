@@ -21,6 +21,7 @@ def paid_cart(code):
         items = Cart.objects.filter(code=code)[0].items.all()
         for item in items:
             item.amount = max(0, item.amount - 1)
+            item.save()
     except:
         pass
 

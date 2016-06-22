@@ -7,11 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, User
 from paypal.standard.forms import PayPalPaymentsForm
-from estore.utils import get_code, get_cost, add_item, remove_item
+from estore.utils import get_code, get_cost, add_item, remove_item, paid_cart
 from estore.models import Cart, Item, Category
 
 def index(request, category_id = -1):
-    import estore.signals
     template = loader.get_template('estore/index.html')
     code = get_code(request)
     cart_items = Cart.objects.filter(code=code)[0].items.all()
@@ -119,6 +118,7 @@ def paypal_pay(request):
         "cancel_return": "http://127.0.0.1:8000/payment/cart/",
         "custom": str(request.user.id)
     }
+    paid_cart(code)
 
     form = PayPalPaymentsForm(initial=paypal_dict)
     context = {"form": form, "paypal_dict": paypal_dict}
